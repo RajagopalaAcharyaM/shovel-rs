@@ -1,6 +1,5 @@
 # shovel-rs
 A high-performance, lean Data Catalog and Orchestrator built in Rust with a bilateral Python interface.
-Technical Specification: Shovel (shovel.rs)
 
 Technical Specification: Shovel (shovel.rs)
 
@@ -11,7 +10,7 @@ Core Unit: The Plot (The Data Asset).
 
 In Shovel, we do not manage "datasets"; we manage Plots. A Plot represents a physical location of data (S3, Local, DB) that must be surveyed, prepared, and maintained.
 
-    Why: This shifts the mindset from abstract "data management" to the physical reality of Geospatial Engineering.
+    Why: This shifts the mindset from abstract "data management" to the physical reality of Data Engineering.
 
 2. Phased Development Strategy
 
