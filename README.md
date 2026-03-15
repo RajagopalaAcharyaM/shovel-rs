@@ -89,18 +89,16 @@ Building the Workspace
 Bash
 
 # Build all crates in the workspace
-cargo build --release
+`cargo build --release`
 
 # Build and install the Python bindings locally
-cd shovel && maturin develop
+`cd shovel && maturin develop`
 
 Running the Orchestrator
 Bash
 
-cargo run -p excavator -- --help
+`cargo run -p excavator -- --help`
 
 📜 License
 
-Personal Project - Industrial Grade Engineering.
-
-Would you like me to generate the common/src/lib.rs file next? This will define the core Enums (like DataType and StatValue) that both shovel and excavator will need to share.
+Well let me see later if this even needs a license hehee
