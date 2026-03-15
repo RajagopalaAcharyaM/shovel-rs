@@ -1,89 +1,105 @@
-# shovel-rs
-A high-performance, lean Data Catalog and Orchestrator built in Rust with a bilateral Python interface.
+Shovel (shovel.rs)
 
-Technical Specification: Shovel (shovel.rs)
+The Bilateral Geospatial Data Catalog & Orchestrator.
 
-Project Goal: A high-performance, lean Data Catalog and Orchestrator.
+Shovel is a high-performance, lean data engine built in Rust with a native Python heart. It is designed to bridge the gap between low-level data engineering and high-level data science by treating metadata as a versioned, statistical ledger.
+🏗️ Core Philosophy
 
-Core Unit: The Plot (The Data Asset).
-1. Core Philosophy: The "Plot" Concept
+Shovel operates on the principle of The Plot. In this system, a dataset is a physical "Plot" of land that must be surveyed and maintained.
 
-In Shovel, we do not manage "datasets"; we manage Plots. A Plot represents a physical location of data (S3, Local, DB) that must be surveyed, prepared, and maintained.
+    Stake (Register): Define the URI/Path boundaries of the data.
 
-    Why: This shifts the mindset from abstract "data management" to the physical reality of Data Engineering.
+    Sift / Clarify (Discovery): Vectorized inference of both structure (Schema) and health (Statistics).
 
-2. Phased Development Strategy
+    Grade (Validation): Enforce contracts by comparing incoming data against established baselines.
 
-To ensure "Industrial Grade" stability while maintaining a "Lean" velocity, development is partitioned into three symbiotic phases.
-Phase 1: The Foundation (Groundbreaking)
+    Trench (Lineage): An immutable, graph-based record of every transformation and move.
 
-Features: Stake, Sift (Schema only), and Grade (Schema only).
+🚀 Phased Implementation Strategy
+Phase 1: The Foundation (Structural)
 
-    The "Why": Establishing the "Bilateral" bridge between Rust and Python is the highest technical hurdle. This phase ensures the basic registry and DuckDB-backed schema discovery are bulletproof before adding complexity.
+    Registry: Persistent storage of data URIs in an internal DuckDB instance.
 
-Phase 2: The Infrastructure (The Survey)
+    Structural Sifting: Automated inference of column names and data types (Parquet, CSV, GeoJSON).
 
-Features: Variants, Observability, and Statistical Sifting.
+    Bilateral Bridge: Using PyO3 and Apache Arrow to expose Rust structs to Python with zero-copy overhead.
 
-    The "Why": A schema alone is a static snapshot. Real-world data is dynamic. Adding "Statistical Sheets" (Min, Max, Mean, Null-counts) per variant allows the tool to detect Data Drift.
+Phase 2: The Infrastructure (Observability)
 
-    Implementation: DuckDB runs vectorized aggregation queries during the "Sift" phase to generate a Baseline.
+    Statistical Profiling: Automated calculation of "Stat Sheets" (Mean, StdDev, Null-counts, Quantiles) using DuckDB’s vectorized kernels.
 
-Phase 3: The Ledger (The Trench)
+    Metadata Variants: Support for multiple logical views (e.g., Bronze, Silver, Gold) for a single physical Stake.
 
-Features: Git-like Versioning (Forks, Checkpoints, and Rollbacks).
+    Drift Detection: Automated "Swing Tests" that trigger warnings when new data statistics deviate from the baseline variant.
 
-    The "Why": Versioning metadata prevents destructive updates. By treating metadata like source code, multiple users can experiment on "Forks" of a Plot without breaking the production pipeline's "Master" variant.
+Phase 3: The Ledger (Versioning)
 
-3. Technical Architecture: The "DuckDB-Arrow" Engine
-3.1 The Compute Engine: DuckDB
+    Git-like Metadata: Parent-child versioning for all metadata entries.
 
-Despite being a personal project, Shovel utilizes DuckDB as its internal compute kernel.
+    Forks & Publishing: Create isolated metadata branches (Forks) for experimentation and Publish them to the Master pointer once graded.
 
-    Respectable Performance: DuckDB's vectorized execution engine provides world-class performance on a single node, often outperforming "Enterprise" cloud warehouses for datasets under 1TB.
+    Rollbacks: Instant state recovery by reassigning variant pointers in the ledger.
 
-    Spatial Superiority: Native support for geospatial types (WKB/WKT) and spatial indexing allows Shovel to "Sift" complex geometries with zero-copy overhead.
+🛠️ Technical Stack
 
-3.2 The Exchange Format: Apache Arrow
+    Language: Rust (Stable) for the core execution and safety.
 
-    Bilateral Harmony: All data transit between the Rust engine and the Python API occurs via Apache Arrow.
+    FFI: PyO3 for Python bindings.
 
-    Zero-Copy: By sharing memory pointers, Shovel eliminates the "serialization tax," allowing a Python Geopandas user to consume Rust-processed data at native speed.
+    Engine: DuckDB for in-process OLAP, SQL-based metadata querying, and geospatial processing.
 
-4. Feature Set Deep-Dive
-Feature	Thematic Name	Technical Action	Why?
-Registration	Stake	Declare path in the DuckDB registry.	To define the boundary of the Plot.
-Inference	Sift	Map types + Calculate statistics.	To understand the "soil quality" (data health).
-Validation	Grade	Compare incoming data vs. Baseline.	To prevent "Off-Grade" (Drift) failures.
-Branching	Fork	Create a child-variant of metadata.	To allow safe schema experimentation.
-Promotion	Publish	Update the Master pointer to a new ID.	To move from "Draft" to Production.
-5. Storage Schema (Internal DuckDB)
+    Memory Format: Apache Arrow for shared-memory transit between Rust and Python.
 
-The internal brain of Shovel consists of two primary tables:
+    Persistence: Internal .shovel.db (DuckDB) for registry and lineage.
 
-    registry_plots: Stores the location and identity of every staked asset.
-
-    metadata_ledger: A parent-child versioned table storing JSON blobs of schemas and statistical sheets.
+📂 Project Structure
+Plaintext
 
 shoveller/
-├── Cargo.toml                # 
-├── README.md                 # Project vision
-├── TECH_SPEC.md              # The file we just wrote
-├── shovel/                   # THE CATALOG (Crate 1: Library)
-│   ├── Cargo.toml            # Shovel-specific dependencies (DuckDB, Serde)
-│   ├── src/
-│   │   ├── lib.rs            # Entry point for the Rust logic
-│   │   ├── core/             # Internal logic (Sift, Stake, Grade)
+├── Cargo.toml                # Workspace configuration
+├── README.md                 # Project overview
+├── TECH_SPEC.md              # Detailed technical requirements
+├── shovel/                   # THE CATALOG (Crate: Library)
+│   ├── Cargo.toml
+│   ├── src/                  
+│   │   ├── lib.rs            # Rust entry point
+│   │   ├── core/             # Stake, Sift, Grade logic
 │   │   └── registry/         # DuckDB interaction layer
-│   └── python/               # PyO3 bridge (Bilateral layer)
-│       └── lib.rs            # The #[pymodule] definition
-├── excavator/                # THE ORCHESTRATOR (Crate 2: Binary)
-│   ├── Cargo.toml            # Depends on ../shovel
+│   └── python/               
+│       └── lib.rs            # PyO3 module definitions
+├── excavator/                # THE ORCHESTRATOR (Crate: Binary)
+│   ├── Cargo.toml
 │   └── src/
-│       ├── main.rs           # The CLI entry point
-│       └── engine/           # Execution & Lineage logic
-└── common/                   # SHARED CODE (Optional but recommended)
-    ├── Cargo.toml
+│       └── main.rs           # CLI / Execution entry point
+└── common/                   # SHARED UTILS
     └── src/
         └── lib.rs            # Shared Enums (Geotypes, Error types)
 
+⌨️ Development
+Prerequisites
+
+    Rust (1.75+)
+
+    Python (3.9+)
+
+    maturin (for building Python bindings)
+
+Building the Workspace
+Bash
+
+# Build all crates in the workspace
+cargo build --release
+
+# Build and install the Python bindings locally
+cd shovel && maturin develop
+
+Running the Orchestrator
+Bash
+
+cargo run -p excavator -- --help
+
+📜 License
+
+Personal Project - Industrial Grade Engineering.
+
+Would you like me to generate the common/src/lib.rs file next? This will define the core Enums (like DataType and StatValue) that both shovel and excavator will need to share.
