@@ -2,92 +2,69 @@
 A high-performance, lean Data Catalog and Orchestrator built in Rust with a bilateral Python interface.
 Technical Specification: Shovel (shovel.rs)
 
-Project Goal: A high-performance, lean Data Catalog and Orchestrator built in Rust with a bilateral Python interface.
-1. Core Features & Functional Requirements
-1.1 Automated Data Asset Registry (Stake)
+Technical Specification: Shovel (shovel.rs)
 
-    Feature: DataAsset::new(path)
+Project Goal: A high-performance, lean Data Catalog and Orchestrator.
 
-    Description: Shovel must automatically initialize a data asset when a path (Local, S3, or Database) is provided.
+Core Unit: The Plot (The Data Asset).
+1. Core Philosophy: The "Plot" Concept
 
-    Requirement: The system must not require the user to manually define a schema. It must perform lazy discovery to determine the file type (Parquet, CSV, GeoJSON, etc.).
+In Shovel, we do not manage "datasets"; we manage Plots. A Plot represents a physical location of data (S3, Local, DB) that must be surveyed, prepared, and maintained.
 
-1.2 Automated Schema Inference (Sift)
+    Why: This shifts the mindset from abstract "data management" to the physical reality of Geospatial Engineering.
 
-    Feature: Bilateral Schema Discovery.
+2. Phased Development Strategy
 
-    Description: Shovel "Sifts" the raw data to extract column names, data types, and geospatial metadata (SRID, Geometry Type).
+To ensure "Industrial Grade" stability while maintaining a "Lean" velocity, development is partitioned into three symbiotic phases.
+Phase 1: The Foundation (Groundbreaking)
 
-    Requirement: Inference must be performed in the Rust core for speed, then exposed to Python as a typed object.
+Features: Stake, Sift (Schema only), and Grade (Schema only).
 
-1.3 Versioned Metadata Ledger (Git-like Branching)
+    The "Why": Establishing the "Bilateral" bridge between Rust and Python is the highest technical hurdle. This phase ensures the basic registry and DuckDB-backed schema discovery are bulletproof before adding complexity.
 
-    Feature: Persistent Metadata Variants.
+Phase 2: The Infrastructure (The Survey)
 
-    Description: Instead of a single metadata column, Shovel maintains a dedicated metadata_variants table in an internal DuckDB instance.
+Features: Variants, Observability, and Statistical Sifting.
 
-    Capabilities:
+    The "Why": A schema alone is a static snapshot. Real-world data is dynamic. Adding "Statistical Sheets" (Min, Max, Mean, Null-counts) per variant allows the tool to detect Data Drift.
 
-        Checkpoints: Immutable snapshots of a schema at a specific time.
+    Implementation: DuckDB runs vectorized aggregation queries during the "Sift" phase to generate a Baseline.
 
-        Forks (Branches): Users can create an isolated metadata variant (e.g., "Experimental") to test schema changes without affecting the "Master" production line.
+Phase 3: The Ledger (The Trench)
 
-        Publishing (Merge): Promoting a verified variant to the "Master" status.
+Features: Git-like Versioning (Forks, Checkpoints, and Rollbacks).
 
-        Rollback: Instantly reverting the "Master" pointer to a previous Checkpoint ID.
+    The "Why": Versioning metadata prevents destructive updates. By treating metadata like source code, multiple users can experiment on "Forks" of a Plot without breaking the production pipeline's "Master" variant.
 
-1.4 Data Contract Enforcement (Grade)
+3. Technical Architecture: The "DuckDB-Arrow" Engine
+3.1 The Compute Engine: DuckDB
 
-    Feature: "Shovel-Ready" Validation.
+Despite being a personal project, Shovel utilizes DuckDB as its internal compute kernel.
 
-    Description: Before the orchestrator executes a task, it "Grades" the incoming data against the active Metadata Variant.
+    Respectable Performance: DuckDB's vectorized execution engine provides world-class performance on a single node, often outperforming "Enterprise" cloud warehouses for datasets under 1TB.
 
-    Requirement: If the incoming data drift (e.g., a column changes from Int to String), Shovel must halt the pipeline and report the "Off-Grade" mismatch.
+    Spatial Superiority: Native support for geospatial types (WKB/WKT) and spatial indexing allows Shovel to "Sift" complex geometries with zero-copy overhead.
 
-1.5 Immutable Lineage (Trench)
+3.2 The Exchange Format: Apache Arrow
 
-    Feature: Structural History.
+    Bilateral Harmony: All data transit between the Rust engine and the Python API occurs via Apache Arrow.
 
-    Description: Every move, transformation, or schema change is recorded in the "Trench."
+    Zero-Copy: By sharing memory pointers, Shovel eliminates the "serialization tax," allowing a Python Geopandas user to consume Rust-processed data at native speed.
 
-    Requirement: This must be a Directed Acyclic Graph (DAG) stored in the internal DB, allowing users to trace the origin and evolution of any asset.
+4. Feature Set Deep-Dive
+Feature	Thematic Name	Technical Action	Why?
+Registration	Stake	Declare path in the DuckDB registry.	To define the boundary of the Plot.
+Inference	Sift	Map types + Calculate statistics.	To understand the "soil quality" (data health).
+Validation	Grade	Compare incoming data vs. Baseline.	To prevent "Off-Grade" (Drift) failures.
+Branching	Fork	Create a child-variant of metadata.	To allow safe schema experimentation.
+Promotion	Publish	Update the Master pointer to a new ID.	To move from "Draft" to Production.
+5. Storage Schema (Internal DuckDB)
 
-2. Technical Architecture
-2.1 Storage Strategy (The "Internal Brain")
+The internal brain of Shovel consists of two primary tables:
 
-    Database: Private DuckDB instance (.shovel.db) managed exclusively by the tool.
+    registry_plots: Stores the location and identity of every staked asset.
 
-    Schema Storage: High-complexity column metadata is stored as JSON blobs within the relational tables to allow for flexible geospatial attributes (Statistics, Bounding Boxes, SRIDs) without constant SQL migrations.
-
-2.2 Bilateral Execution Model
-
-    Core: Rust (for performance-critical Sifting, Grading, and Orchestration).
-
-    Bridge: PyO3 + Apache Arrow. Data is traded between Rust and Python via memory pointers to ensure zero-copy overhead.
-
-    Nomenclature: The API supports dual-naming (e.g., sift() and clarify()) to provide both a unique brand identity and industry-standard familiarity.
-
-3. Rationale for Versioned Metadata
-
-Why not a static catalog?
-In modern data engineering, "Data Drift" is the primary cause of pipeline failure. By treating metadata like source code (with branching and merging), Shovel allows for:
-
-    Zero-Downtime Schema Updates: Prepare the new metadata variant before the new data arrives.
-
-    Safe Multi-user Collaboration: Different team members can "Sift" and "Fork" the same asset without collisions.
-
-    Recovery: Metadata is no longer a destructive update; it is a permanent ledger.
-
-4. Implementation Constraints
-
-    Language: Rust (Stable).
-
-    Interactions: Python 3.9+.
-
-    Data Engine: DuckDB (Storage and compute).
-
-    Spatial Support: PostGIS-compatible (WKB/WKT).
-
+    metadata_ledger: A parent-child versioned table storing JSON blobs of schemas and statistical sheets.
 
 shoveller/
 ├── Cargo.toml                # 
