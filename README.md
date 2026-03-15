@@ -73,7 +73,8 @@ Plaintext
 │       └── main.rs           # CLI / Execution entry point
 └── common/                   # SHARED UTILS
     └── src/
-        └── lib.rs            # Shared Enums (Geotypes, Error types)```
+        └── lib.rs            # Shared Enums (Geotypes, Error types)
+```
 
 ⌨️ Development
 Prerequisites
