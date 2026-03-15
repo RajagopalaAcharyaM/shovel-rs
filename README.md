@@ -55,7 +55,7 @@ Phase 3: The Ledger (Versioning)
 📂 Project Structure
 Plaintext
 
-shoveller/
+```shoveller/
 ├── Cargo.toml                # Workspace configuration
 ├── README.md                 # Project overview
 ├── TECH_SPEC.md              # Detailed technical requirements
@@ -73,7 +73,7 @@ shoveller/
 │       └── main.rs           # CLI / Execution entry point
 └── common/                   # SHARED UTILS
     └── src/
-        └── lib.rs            # Shared Enums (Geotypes, Error types)
+        └── lib.rs            # Shared Enums (Geotypes, Error types)```
 
 ⌨️ Development
 Prerequisites
