@@ -3,19 +3,3 @@ Starting with Data Registration, Variant registration, Blue print fetch, track a
 
 The library will follow best practices from compositions over inheritance to accomodate any future changes to basic classes that might hinder future refactor
 
-Listing the functionalities and what they do
-- [[Register]]
-	- [[Register Master]]
-	- [[Register Variant]]
-- [[Update]]
-	- [[Update Master]]
-	- [[Update Variant]]
-- [[Archive]]
-	- [[Archive Master]]
-	- [[Archive Variant]]
-- [[Verify]]
-- [[Validate]]
-- [[Sift]]
-- [[Generate Blueprint]]
-- [[Fetch Blueprint]]
-- [[Set Warning Level]]
