@@ -8,7 +8,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 2. BASE DATASET TABLE
 -- ==========================================
 CREATE TABLE shovel.datasets (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     dataset_id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     description TEXT,
@@ -19,7 +19,7 @@ CREATE TABLE shovel.datasets (
 -- 3. METADATA HISTORY (Immutable Log)
 -- ==========================================
 CREATE TABLE shovel.metadata_history (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     dataset_id INTEGER NOT NULL REFERENCES shovel.datasets(id) ON DELETE CASCADE,
     metadata JSONB NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -36,7 +36,7 @@ WHERE archived_at IS NULL;
 -- 4. DATASET VERSION (The Commit Tree)
 -- ==========================================
 CREATE TABLE shovel.dataset_versions (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     dataset_id INTEGER NOT NULL REFERENCES shovel.datasets(id) ON DELETE CASCADE,
     version_number INTEGER NOT NULL,
     parent_version_id INTEGER REFERENCES shovel.dataset_versions(id) ON DELETE SET NULL,
@@ -55,7 +55,7 @@ CREATE INDEX idx_dataset_versions_parent ON shovel.dataset_versions(parent_versi
 -- 5. COLUMNS TABLE (Flat Schema Design)
 -- ==========================================
 CREATE TABLE shovel.columns (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     dataset_version_id INTEGER NOT NULL REFERENCES shovel.dataset_versions(id) ON DELETE CASCADE,
     column_name VARCHAR(255) NOT NULL,
     data_type VARCHAR(100) NOT NULL,
@@ -75,7 +75,7 @@ CREATE INDEX idx_columns_version_id ON shovel.columns(dataset_version_id);
 -- 6. STORAGE REGISTRY (Append-Only Data Paths)
 -- ==========================================
 CREATE TABLE shovel.dataset_storage (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     dataset_version_id INTEGER NOT NULL REFERENCES shovel.dataset_versions(id) ON DELETE CASCADE,
     storage_type VARCHAR(50) NOT NULL, 
     file_format VARCHAR(50) NOT NULL,  
@@ -91,7 +91,7 @@ CREATE INDEX idx_storage_version_id ON shovel.dataset_storage(dataset_version_id
 -- 7. BRANCH POINTER TABLE (Git HEADs)
 -- ==========================================
 CREATE TABLE shovel.dataset_branches (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     dataset_id INTEGER NOT NULL REFERENCES shovel.datasets(id) ON DELETE CASCADE,
     branch_name VARCHAR(100) NOT NULL,
     current_version_id INTEGER NOT NULL REFERENCES shovel.dataset_versions(id),
