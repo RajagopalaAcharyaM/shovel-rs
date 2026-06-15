@@ -1,0 +1,2 @@
+A [[Variant]] dataset is a closely related to a [[Master]] dataset but either it lacks certain features or has some added features depending on what the provider chooses to do, A [[Master]] can have many [[Variant]] datasets
+- This should be registered using [[Register Variant]] function

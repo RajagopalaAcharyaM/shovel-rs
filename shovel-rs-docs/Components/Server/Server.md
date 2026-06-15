@@ -1,0 +1,1 @@
+A basic scheduler server that connects to its trenchers or workers. This will schedule flows or pipelines and will handle until they are done task wise like prefect
